@@ -38,14 +38,15 @@
 }
 /* line 43, ../sass/pegasusCalendar.scss */
 .pegasus-cal .cal-head .head-left label {
+  line-height: 40px;
   float: left;
   cursor: pointer;
 }
-/* line 46, ../sass/pegasusCalendar.scss */
+/* line 47, ../sass/pegasusCalendar.scss */
 .pegasus-cal .cal-head .head-left label.active {
   color: #0BB8DC;
 }
-/* line 51, ../sass/pegasusCalendar.scss */
+/* line 52, ../sass/pegasusCalendar.scss */
 .pegasus-cal .cal-head .head-right {
   float: right;
   height: 40px;
@@ -57,38 +58,38 @@
   -webkit-transition-delay: 0s;
   transition: all 0.25s ease-in-out 0s;
 }
-/* line 57, ../sass/pegasusCalendar.scss */
+/* line 58, ../sass/pegasusCalendar.scss */
 .pegasus-cal .cal-head .head-right.show-return {
   margin-top: -40px;
 }
-/* line 61, ../sass/pegasusCalendar.scss */
+/* line 62, ../sass/pegasusCalendar.scss */
 .pegasus-cal .cal-head input[type="radio"] {
   float: left;
   margin: 14px 4px 0 15px;
+  display: block;
 }
-/* line 66, ../sass/pegasusCalendar.scss */
+/* line 68, ../sass/pegasusCalendar.scss */
 .pegasus-cal .cal-body {
   overflow: hidden;
 }
-/* line 69, ../sass/pegasusCalendar.scss */
+/* line 71, ../sass/pegasusCalendar.scss */
 .pegasus-cal .body-left {
   width: 23%;
   float: left;
   background: #EDEDED;
   /*padding: 2px 0;*/
 }
-/* line 75, ../sass/pegasusCalendar.scss */
+/* line 77, ../sass/pegasusCalendar.scss */
 .pegasus-cal .body-right {
   float: left;
   width: 77%;
 }
-/* line 79, ../sass/pegasusCalendar.scss */
+/* line 81, ../sass/pegasusCalendar.scss */
 .pegasus-cal ul.month-list {
-  color: #000;
   position: relative;
   overflow: hidden;
 }
-/* line 83, ../sass/pegasusCalendar.scss */
+/* line 84, ../sass/pegasusCalendar.scss */
 .pegasus-cal ul.month-list li {
   line-height: 28px;
   position: relative;
@@ -96,8 +97,9 @@
   /*            &.active{
               }*/
 }
-/* line 87, ../sass/pegasusCalendar.scss */
+/* line 88, ../sass/pegasusCalendar.scss */
 .pegasus-cal ul.month-list li a {
+  color: #000;
   padding: 0 0 0 12px;
   display: block;
   -moz-transition: all 0.2s ease 0s;
@@ -106,18 +108,18 @@
   -webkit-transition-delay: 0s;
   transition: all 0.2s ease 0s;
 }
-/* line 91, ../sass/pegasusCalendar.scss */
+/* line 93, ../sass/pegasusCalendar.scss */
 .pegasus-cal ul.month-list li a:hover {
   /*                    background: darken($color-grey-bg , 10%);
                       font-size: 110%;*/
 }
-/* line 96, ../sass/pegasusCalendar.scss */
+/* line 98, ../sass/pegasusCalendar.scss */
 .pegasus-cal ul.month-list li small {
   color: #868686;
   font-size: 85%;
   margin-left: 10px;
 }
-/* line 103, ../sass/pegasusCalendar.scss */
+/* line 105, ../sass/pegasusCalendar.scss */
 .pegasus-cal ul.month-list li.active-mark {
   background: #fff;
   border-left: 3px solid #FF9334;
@@ -129,29 +131,32 @@
   width: 100%;
   /*@include transition(all 0.15s linear 0s);*/
 }
-/* line 117, ../sass/pegasusCalendar.scss */
+/* line 119, ../sass/pegasusCalendar.scss */
 .pegasus-cal .days-head {
   text-transform: uppercase;
   width: 97%;
-  text-align: center;
   line-height: 35px;
-  font-weight: bold;
   color: #7F7F7F;
   margin-right: 24px;
   table-layout: fixed;
 }
-/* line 128, ../sass/pegasusCalendar.scss */
+/* line 126, ../sass/pegasusCalendar.scss */
+.pegasus-cal .days-head td, .pegasus-cal .days-head th {
+  text-align: center;
+  font-weight: bold;
+}
+/* line 132, ../sass/pegasusCalendar.scss */
 .pegasus-cal .month-wrapper {
   overflow-x: hidden;
   overflow-y: scroll;
   height: 302px;
 }
-/* line 132, ../sass/pegasusCalendar.scss */
+/* line 136, ../sass/pegasusCalendar.scss */
 .pegasus-cal .month-wrapper .month-box {
   position: relative;
   /*padding: 0 0 10px 0;*/
 }
-/* line 135, ../sass/pegasusCalendar.scss */
+/* line 139, ../sass/pegasusCalendar.scss */
 .pegasus-cal .month-wrapper .month-box .month-title {
   padding: 0 0 5px 0;
   border-bottom: 2px solid #e1e1e1;
@@ -161,79 +166,85 @@
   left: 10px;
   z-index: 10;
 }
-/* line 148, ../sass/pegasusCalendar.scss */
+/* line 152, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container.adjust-month {
   padding: 40px 0 0 0;
 }
-/* line 152, ../sass/pegasusCalendar.scss */
+/* line 156, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table {
   width: 100%;
   table-layout: fixed;
   text-align: center;
   font-size: 15px;
 }
-/* line 157, ../sass/pegasusCalendar.scss */
+/* line 161, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table tr {
   height: 50px;
 }
-/* line 160, ../sass/pegasusCalendar.scss */
+/* line 164, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table td {
   vertical-align: middle;
   /*cursor: pointer;*/
   position: relative;
+  text-align: center;
   /*&.return-daybox {opacity: 0.3; background: red;}*/
 }
-/* line 164, ../sass/pegasusCalendar.scss */
+/* line 169, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table td a {
   display: block;
   height: 50px;
+  color: inherit;
 }
-/* line 168, ../sass/pegasusCalendar.scss */
+/* line 174, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table td .day-num {
   display: block;
   padding: 12px 0 4px;
 }
-/* line 172, ../sass/pegasusCalendar.scss */
+/* line 178, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table td.mid-daybox {
   background-color: #e6fbff;
 }
-/* line 175, ../sass/pegasusCalendar.scss */
+/* line 181, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table td .price {
   color: gray;
   font-size: 75%;
   display: block;
 }
-/* line 179, ../sass/pegasusCalendar.scss */
+/* line 185, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table td .price.lowestPrice {
   color: #00a600;
 }
-/* line 183, ../sass/pegasusCalendar.scss */
+/* line 189, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table td:hover {
   background-color: #ccf7ff;
 }
-/* line 185, ../sass/pegasusCalendar.scss */
+/* line 191, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table td:hover p.holiday-desc {
   display: block;
 }
-/* line 189, ../sass/pegasusCalendar.scss */
+/* line 195, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table td.disabled, .pegasus-cal .day-container-table td.inActiveTD {
   color: #bababa;
   background-color: #fff;
 }
-/* line 192, ../sass/pegasusCalendar.scss */
+/* line 198, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table td.disabled a, .pegasus-cal .day-container-table td.inActiveTD a {
   cursor: default;
 }
-/* line 196, ../sass/pegasusCalendar.scss */
+/* line 200, ../sass/pegasusCalendar.scss */
+.pegasus-cal .day-container-table td.disabled a .price, .pegasus-cal .day-container-table td.inActiveTD a .price {
+  display: none;
+}
+/* line 203, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table td.return-daybox, .pegasus-cal .day-container-table td.depart-daybox {
   background-color: #00b5d3;
   color: #fff;
 }
-/* line 199, ../sass/pegasusCalendar.scss */
+/* line 206, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table td.return-daybox .price, .pegasus-cal .day-container-table td.depart-daybox .price {
   color: #fff;
 }
-/* line 205, ../sass/pegasusCalendar.scss */
+/* line 212, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table i.holiday-ico {
   background: #f5951d;
   -moz-border-radius: 50%;
@@ -245,7 +256,7 @@
   width: 5px;
   position: absolute;
 }
-/* line 214, ../sass/pegasusCalendar.scss */
+/* line 221, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table p.holiday-desc {
   display: none;
   background: #333;
@@ -268,7 +279,7 @@
   left: 0%;
   cursor: default;
 }
-/* line 215, ../sass/pegasusCalendar.scss */
+/* line 222, ../sass/pegasusCalendar.scss */
 .pegasus-cal .day-container-table p.holiday-desc:after {
   border-color: #333 transparent transparent;
   border-style: solid;
@@ -280,7 +291,13 @@
   top: 29px;
   width: 0;
 }
-/* line 248, ../sass/pegasusCalendar.scss */
+/* line 255, ../sass/pegasusCalendar.scss */
 .pegasus-cal .js-month-container {
   position: relative;
+}
+/* line 257, ../sass/pegasusCalendar.scss */
+.pegasus-cal *, .pegasus-cal *:before, .pegasus-cal *:after {
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box;
+  box-sizing: content-box;
 }
