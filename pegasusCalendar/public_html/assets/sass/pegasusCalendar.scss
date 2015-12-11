@@ -1,0 +1,249 @@
+@import "compass/css3";
+
+@font-face {
+    font-family: "Proxima Regular";
+    src: url("../fonts/proxima/ProximaNova-Regular.eot");
+    src: url("../fonts/proxima/ProximaNova-Regular.eot?#iefix") format("embedded-opentype"), url("../fonts/proxima/ProximaNova-Regular.woff") format("woff"), url("../fonts/proxima/ProximaNova-Regular.ttf") format("truetype"), url("../fonts/proxima/ProximaNova-Regular.svg#Proxima Regular") format("svg");
+    font-style: normal;
+    font-weight: normal;
+}
+
+$color-black: #000 !default;
+$color-dark: #3F4044;
+$color-light: #fff;
+$color-selected: #0BB8DC;
+$color-grey-bg: #EDEDED;
+
+$color-day-mid: #e6fbff;
+$color-day-sel: #00b5d3;
+
+.pegasus-cal{
+    font-family: "Proxima Regular";
+    max-width: 480px;
+    width: 100%;
+    font-size: 12px;
+    /*@include border-radius(4px 4px 3px 3px);*/
+    @include box-shadow(0 1px 2px 0 rgba(0, 0, 0, 0.3));
+    overflow: hidden;
+    display: none;
+    z-index: 99999;
+    position: absolute;
+    background: $color-light;
+    .cal-head{
+        background: $color-dark;        
+        color: $color-light;
+        overflow: hidden;
+        line-height: 40px;
+        padding: 0 10px;
+        .head-left{
+            text-transform: uppercase; 
+            float: left;
+            font-size: 10px;
+            margin: 0 0 0 -15px;
+            label{
+                float: left;
+                cursor: pointer;
+                &.active{
+                    color: $color-selected;
+                }
+            }
+        }
+        .head-right{
+            float: right;
+            height: 40px;
+            /*overflow: hidden;*/
+            text-align: right;
+            @include transition(all 0.25s ease-in-out 0s);
+            &.show-return{
+                margin-top: -40px;
+            }
+        }
+        input[type="radio"]{
+            float: left;
+            margin: 14px 4px 0 15px;
+        }
+    }
+    .cal-body{
+        overflow: hidden;
+    }
+    .body-left{
+        width: 23%;
+        float: left;
+        background: $color-grey-bg;
+        /*padding: 2px 0;*/
+    }
+    .body-right{
+        float: left;
+        width: 77%;
+    }
+    ul.month-list{
+        color: $color-black;
+        position: relative;
+        overflow: hidden;
+        li{
+            line-height: 28px;
+            position: relative;
+            z-index: 3;
+            a{
+                padding: 0 0 0 12px;
+                display: block;
+                @include transition(all 0.2s ease 0s);
+                &:hover{
+                    /*                    background: darken($color-grey-bg , 10%);
+                                        font-size: 110%;*/
+                }
+            }
+            small{
+                color: #868686;
+                font-size: 85%;
+                margin-left: 10px;
+            }
+            /*            &.active{
+                        }*/
+            &.active-mark{
+                background: $color-light;
+                border-left: 3px solid #FF9334;
+                left: 0;
+                position: absolute;
+                z-index: 2;
+                top: 0%;
+                height: 28px;
+                width: 100%;
+                /*@include transition(all 0.15s linear 0s);*/
+            }
+        }
+    }
+
+    .days-head{
+        text-transform: uppercase; 
+        width: 97%;
+        text-align: center;
+        line-height: 35px;
+        font-weight: bold;
+        color: #7F7F7F;
+        margin-right: 24px;
+        table-layout: fixed;
+    }
+
+    .month-wrapper{
+        overflow-x: hidden;
+        overflow-y: scroll;
+        height: 302px;
+        .month-box{
+            position: relative;
+            /*padding: 0 0 10px 0;*/ 
+            .month-title{
+                padding: 0 0 5px 0; 
+                border-bottom: 2px solid #e1e1e1;
+                font-size: 15px;
+                position: absolute;
+                top: 10px;
+                left: 10px; 
+                z-index: 10;
+            }
+        }
+    }
+
+    .day-container{
+        &.adjust-month{
+            padding: 40px 0 0 0;
+        }
+    }
+    .day-container-table{
+        width: 100%;
+        table-layout: fixed;
+        text-align: center;
+        font-size: 15px;
+        tr{
+            height: 50px;
+        }
+        td{
+            vertical-align: middle;
+            /*cursor: pointer;*/
+            position: relative; 
+            a{
+                display: block;
+                height: 50px;
+            }
+            .day-num{
+                display: block;
+                padding: 12px 0 4px;
+            }
+            &.mid-daybox{
+                background-color: $color-day-mid;
+            }
+            .price{
+                color: lighten($color-black, 50%);
+                font-size: 75%;
+                display: block;
+                &.lowestPrice{
+                    color: #00a600;
+                }
+            }
+            &:hover  {
+                background-color: darken($color-day-mid,5%);
+                p.holiday-desc{
+                    display: block;
+                }
+            }
+            &.disabled , &.inActiveTD{
+                color: darken($color-grey-bg , 20%);
+                background-color: $color-light;
+                a{
+                    cursor: default;
+                }
+            }
+            &.return-daybox , &.depart-daybox{
+                background-color: $color-day-sel;
+                color: #fff;
+                .price{
+                    color: $color-light;
+                }
+            }
+            /*&.return-daybox {opacity: 0.3; background: red;}*/
+        }
+        i.holiday-ico{
+            background: #f5951d;
+            @include border-radius(50%);
+            height: 5px;
+            right: 7px;
+            top: 7px;
+            width: 5px;
+            position: absolute;
+        }
+        p.holiday-desc{
+            &:after {
+                border-color: #333 transparent transparent;
+                border-style: solid;
+                border-width: 10px;
+                content: "";
+                height: 0;
+                left: 50px;
+                position: absolute;
+                top: 29px;
+                width: 0;
+            }
+            display: none;
+            background: #333;
+            border: 1px solid #333;
+            border-radius: 3px;
+            box-shadow: 1px 1px 2px 0 rgba(0, 0, 0, 0.1);
+            color: #fff;
+            font-size: 12px;
+            font-weight: normal;
+            line-height: 18px;
+            min-width: 100px;
+            padding: 5px 10px;
+            position: absolute;
+            text-align: center;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
+            z-index: 9;
+            margin: -30px 0 0 -36px;
+            top: 0%;
+            left: 0%;
+            cursor: default;
+        }
+    }
+    .js-month-container{position: relative;}
+}
