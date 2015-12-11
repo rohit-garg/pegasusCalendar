@@ -96,7 +96,7 @@ function PegasusCalendar(opt) {
         $('.' + clsNames.monthList, holder).append('<li class="' + clsNames.monthSlider + '"></li>');
     };
 
-    this.selectDate = function (ele) {
+    this.selectDate = function (ele, dontClose) {
         var date = ele.date;
         if (_this.fromDate == null) {
             selectFrom();
@@ -125,6 +125,16 @@ function PegasusCalendar(opt) {
             toDate: _this.toDate,
             mode: _this.mode
         });
+
+        if (!dontClose) {
+            if (_this.mode == modes.O) {
+                _closeCalendar();
+            }
+            else if (_this.mode == modes.R && _this.toDate != null) {
+                _closeCalendar();
+            }
+        }
+
 //        console.log($(settings.inputEle).data());
         _fireCallback("dateChange", _this.getCurrentState());
 
@@ -315,7 +325,7 @@ function PegasusCalendar(opt) {
             var val = input.val();
             _this.mode = modes[val];
             if (_this.fromEle) {
-                _this.selectDate(_this.fromEle);
+                _this.selectDate(_this.fromEle, true);
             }
             radioEle.parent().removeClass('active');
             input.parent().addClass('active');
