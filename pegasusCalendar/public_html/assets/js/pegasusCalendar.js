@@ -1,6 +1,6 @@
 /* Description: Scrollable Calendar with one year visible, to and from in one field
  * Dependencies: jQuery & msCalendar      
- * Version: 1.0.0 
+ * Version: 1.0.3
  * Date: 07 Dec 2015
  * */
 
@@ -8,26 +8,42 @@ function PegasusCalendar(opt) {
     var monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     var _this = this;
     var modes = {
-        R: 'Round-Trip',
-        O: 'One Way'
+        R: 'R',
+        O: 'O'
     };
-    this.mode = modes.R;
+    this.mode = modes.O;
     this.fromDate = null;
     this.toDate = null;
     this.fromEle = null;
     this.toEle = null;
 
+    var defaultID = 'PegasusCal-' + PegasusCalendar.prototype.count;
+
     var settings = $.extend({
-        restrictDate: new Date(),
+        minDate: new Date(),
+        maxDate: null,
+        daysNum: 0,
         inputEle: null,
-        holder: '#PegasusCal-' + PegasusCalendar.prototype.count
+        departOnly: false,
+        returnCalOnly: false,
+        hideModes: false,
+        outputFormat: null,
+        sameDayReturn: {allow: true, cb: null},
+        selectTxts: ['Select Departure Date', 'Select Return Date'],
+        retrunTxt: 'Return date',
+        defaultMode: _this.mode,
+        holder: '#' + defaultID,
+        onOpen: null
     }, opt);
 
+    $('body').append($('<div id="' + defaultID + '" >'));
+
+    var inputEle = $(settings.inputEle);
     var holder = $(settings.holder);
 
-    if (typeof opt.holder === "undefined") {
-        holder = $('<div id="' + settings.holder + '" >');
-    }
+//    if (typeof opt.holder === "undefined") {
+//        holder = $('<div id="' + settings.holder + '" >');
+//    }
 
     var clsNames = {
         monthBox: 'month-box',
@@ -38,6 +54,7 @@ function PegasusCalendar(opt) {
         dayAnchor: 'datetext',
         monthWrapper: 'js-viewport',
         monthList: 'month-list',
+        headEle: 'cal-head',
         modes: {
             radio: 'js-mode-type',
             container: 'head-right',
@@ -50,17 +67,45 @@ function PegasusCalendar(opt) {
         }
     };
 
-    var callbackArr = {dateChange: [], modeChange: []};
+    var callbackArr = {dateChange: [], modeChange: [], open: []};
 
     var msCal = new msCalendar();
 
     var _init = function () {
+        _setMaxDate();
         _clearInputCache();
         _generateHTML();
         _createMonthList();
         _createAllMonths();
         _attachEvents();
         _attachCallbacks();
+        _checkCalType();
+    };
+
+    var _setMaxDate = function () {
+        var days = settings.daysNum;
+        if (days) {
+            var tempDate = new Date(settings.minDate);
+            tempDate.setDate(tempDate.getDate() + days);
+            settings.maxDate = new Date(tempDate);
+        }
+    };
+
+    this.setDates = function (obj) {
+        var tempFrom = obj.from;
+        var tempTo = obj.to;
+
+        if (tempFrom) {
+            _this.resetDates();
+            if (tempTo) {
+                _selectRoundTrip();
+                $('a.' + clsNames.dayAnchor, holder).filter('#' + getAnchorId(tempTo)).click();
+            }
+            $('a.' + clsNames.dayAnchor, holder).filter('#' + getAnchorId(tempFrom)).click();
+        }
+        function getAnchorId(str) {
+            return 'a_' + str.split('/').reverse().join('_');
+        }
     };
 
     var _createMonth = function (date) {
@@ -68,10 +113,11 @@ function PegasusCalendar(opt) {
         var month = monthNames[date.getMonth()];
         var monthTitle = $('<div class="' + clsNames.monthTitle + '" />').html(month);
         var month_id = settings.holder.slice(1) + '-month-' + (date.getMonth() + 1) + '-' + date.getFullYear();
+        $('#' + month_id).parent().remove();
         var dayContainer = $('<div class="' + clsNames.dayContainer + '" id="' + month_id + '" />').get(0);
         monthBox.append(monthTitle, dayContainer);
         $('.' + clsNames.monthContainer, holder).append(monthBox);
-        msCal.init(month_id, date, undefined, undefined, settings.restrictDate);
+        msCal.init(month_id, date, undefined, undefined, settings.minDate, settings.maxDate);
     };
 
     var _createAllMonths = function () {
@@ -82,6 +128,29 @@ function PegasusCalendar(opt) {
             _createMonth(date);
             date.setMonth(num + 1);
         }
+    };
+
+    this.setMinDate = function (date) {
+        if (date) {
+            settings.minDate = date;
+            _createAllMonths();
+        }
+        if (date >= _this.fromDate) {
+            _this.resetDates();
+        }
+        if (_this.fromEle) {
+            var eleId = $(_this.fromEle).attr('id');
+            _this.fromEle = $('a.' + clsNames.dayAnchor, holder).filter('#' + eleId);
+            $('a.' + clsNames.dayAnchor, holder).filter('#' + eleId).parent().addClass('depart-daybox');
+        }
+    };
+
+    this.resetDates = function () {
+        _this.fromDate = null;
+        _this.toDate = null;
+        _this.fromEle = null;
+        _this.toEle = null;
+        _updateInput();
     };
 
     var _createMonthList = function () {
@@ -120,7 +189,8 @@ function PegasusCalendar(opt) {
         }
         _updateDayClasses();
         _updateModeClasses();
-        $(settings.inputEle).data({
+
+        inputEle.data({
             fromDate: _this.fromDate,
             toDate: _this.toDate,
             mode: _this.mode
@@ -135,7 +205,7 @@ function PegasusCalendar(opt) {
             }
         }
 
-//        console.log($(settings.inputEle).data());
+//        console.log(inputEle.data());
         _fireCallback("dateChange", _this.getCurrentState());
 
         function selectFrom() {
@@ -143,6 +213,12 @@ function PegasusCalendar(opt) {
             _this.fromEle = ele;
         }
         function selectTo() {
+            if (!settings.sameDayReturn.allow && _this.fromDate == date) {
+                if (settings.sameDayReturn.cb) {
+                    settings.sameDayReturn.cb.call(_this, {ele: ele});
+                }
+                return;
+            }
             _this.toDate = date;
             _this.toEle = ele;
             if (_this.toDate.getTime() < _this.fromDate.getTime()) {
@@ -161,6 +237,16 @@ function PegasusCalendar(opt) {
         }
     };
 
+    this.clearPrices = function () {
+        $('a.' + clsNames.dayAnchor, holder).each(function () {
+            $('.price', this).remove();
+        });
+    };
+
+    this.dateToStr = function (d, seperator) {
+        return getByDate(d, seperator);
+    };
+
     this.updatePrices = function (data) {
 
         var fares = data.allFares;
@@ -169,23 +255,13 @@ function PegasusCalendar(opt) {
 
         $('a.' + clsNames.dayAnchor, holder).each(function () {
             $('.price', this).remove();
-            var date = this.date;
-            var dateStr = getByDate(date);
-            var monthLF = lf[date.getMonth()];
+            var tempDate = this.date;
+            var dateStr = getByDate(tempDate);
+            var monthLF = lf[tempDate.getMonth()];
             if (typeof fares[dateStr] != "undefined") {
                 $(this).append(getPriceSpan(fares[dateStr], monthLF));
             }
         });
-
-        function getByDate(dt) {
-            var dd = dt.getDate();
-            var mm = (dt.getMonth() + 1);
-            var yyyy = dt.getFullYear();
-            dd = dd < 10 ? "0" + dd : dd;
-            mm = mm < 10 ? "0" + mm : mm;
-            var dtStr = (dd + "/" + mm + "/" + yyyy);
-            return dtStr;
-        }
 
         function getPriceSpan(f, lf) {
             var lpCls = 'lowestPrice';
@@ -197,35 +273,61 @@ function PegasusCalendar(opt) {
         }
 
         function getFormattedPrice(number) {
-            var regexp = new RegExp(/(\d)(?=(\d\d\d)+(?!\d))/g)
+            var regexp = new RegExp(/(\d)(?=(\d\d\d)+(?!\d))/g);
             if (typeof number != 'undefined') {
                 var fNumber = number.toString().replace(regexp, "$1,");
             }
             if (fNumber.length > 6) {
                 return fNumber.substring(0, 1) + "," + fNumber.substring(1, fNumber.length);
-            } else {
+            }
+            else {
                 return	number.toString().replace(regexp, "$1,");
             }
         }
 
     };
 
+    var getByDate = function (dt, seperator) {
+        var dd = dt.getDate();
+        var mm = (dt.getMonth() + 1);
+        var yyyy = dt.getFullYear();
+        dd = dd < 10 ? "0" + dd : dd;
+        mm = mm < 10 ? "0" + mm : mm;
+        if (!seperator) {
+            seperator = "/";
+        }
+        var dtStr = (dd + seperator + mm + seperator + yyyy);
+        return dtStr;
+    };
+
     this.on = function (type, cb) {
         if (callbackArr[type]) {
             callbackArr[type].push(cb);
         }
-    }
+    };
 
     this.getCurrentState = function () {
-        return {F: _this.fromDate, T: _this.toDate, M: _this.mode, modes: modes};
+        return {F: _this.fromDate, T: _this.toDate, M: _this.mode, modes: modes, ele: inputEle};
+    };
+
+    this.setMode = function (type) {
+        var radioEle = $('input.' + clsNames.modes.radio, holder);
+        if (typeof (type) != "undefined" && type) {
+            radioEle.each(function () {
+                var val = $(this).val();
+                if (val == type) {
+                    $(this).trigger('click');
+                }
+            });
+        }
     };
 
     var _updateModeClasses = function () {
         if (_this.mode == modes.R && _this.fromDate != null && _this.toDate == null) {
-            $('.' + clsNames.modes.container, holder).addClass(clsNames.modes.showReturn);
+            $('.' + clsNames.headEle, holder).addClass(clsNames.modes.showReturn);
         }
         else {
-            $('.' + clsNames.modes.container, holder).removeClass(clsNames.modes.showReturn);
+            $('.' + clsNames.headEle, holder).removeClass(clsNames.modes.showReturn);
         }
     };
 
@@ -284,8 +386,12 @@ function PegasusCalendar(opt) {
                     }
                 });
             }
-            _updateInput(gethoverDS(this));
-
+            if (isInRange(this)) {
+                _updateInput(gethoverDS(this));
+            }
+            else {
+                _updateInput(_this.getCurrentState());
+            }
 
         });
 
@@ -297,7 +403,7 @@ function PegasusCalendar(opt) {
         function gethoverDS(ele) {
             var obj = {F: _this.fromDate, T: _this.toDate, M: _this.mode, modes: modes};
             var cur = ele.date;
-            if ((!obj.F) || (obj.F && obj.T)) {
+            if ((!obj.F) || (obj.F && obj.T) || (obj.M == obj.modes.O)) {
                 obj.F = ele.date;
             }
             else if (!obj.T) {
@@ -312,9 +418,22 @@ function PegasusCalendar(opt) {
             return obj;
         }
 
+        function isInRange(ele) {
+//            if ((settings.minDate.getTime() <= ele.date.getTime()) && (settings.maxDate && settings.maxDate.getTime() >= ele.date.getTime())) {
+            if (settings.maxDate) {
+                if ((settings.minDate <= ele.date) && (settings.maxDate >= ele.date)) {
+                    return true;
+                }
+            }
+            else if (settings.minDate <= ele.date) {
+                return true;
+            }
+            return false;
+        }
+
         $('a.' + clsNames.dayAnchor, holder).live('click', function (e) {
             e.preventDefault();
-            if (settings.restrictDate.getTime() < this.date.getTime()) {
+            if (isInRange(this)) {
                 _this.selectDate(this);
             }
         });
@@ -335,7 +454,7 @@ function PegasusCalendar(opt) {
         radioEle.trigger('change');
         $('.' + clsNames.monthList + ' a', holder).first().click();
 
-        $(settings.inputEle).focus(function () {
+        inputEle.focus(function () {
             var offset = $(this).offset();
             var top = offset.top + $(this).outerHeight();
             var left = offset.left - holder.outerWidth() / 2 + $(this).outerWidth() / 2;
@@ -344,22 +463,48 @@ function PegasusCalendar(opt) {
                 left: left
             };
             $(holder).css(cssSettings);
-            $(holder).show();
+            $(holder).fadeIn(200);
+            scrollToRightMonth();
+            _fireCallback("open", _this.getCurrentState());
         });
 
         $(document).mouseup(function (e) {
             var container = $(holder);
-            if (!container.is(e.target) && !$(settings.inputEle).is(e.target) && container.has(e.target).length == 0) {
+            if (!container.is(e.target) && !inputEle.is(e.target) && container.has(e.target).length == 0) {
                 _closeCalendar();
             }
         });
 
+        $('.calViewMessage a.close-cal', holder).live('click', function (e) {
+            e.preventDefault();
+            _this.hideMessage(true);
+        });
 
+        function scrollToRightMonth() {
+            var tempDate = _this.fromDate ? _this.fromDate : settings.minDate;
+            if (tempDate) {
+                var monthId = defaultID + '-month-' + (tempDate.getMonth() + 1) + '-' + tempDate.getFullYear();
+                $('a[href="#' + monthId + '"]').click();
+            }
+        }
+
+        /*$('a.' + clsNames.dayAnchor, holder).live({
+         mouseenter: function () {
+         var clone = $(this).children('.holiday-desc').clone();
+         clone.appendTo('body');
+         clone.css($(this).offset()).show();
+         $(this).data('tooltipclone', clone);
+         },
+         mouseleave: function () {
+         var clone = $(this).data('tooltipclone');
+         clone.remove();
+         }
+         });*/
     };
 
     var _closeCalendar = function () {
         $(holder).fadeOut(200);
-        $(settings.inputEle).blur();
+        inputEle.blur();
     };
 
     var _generateHTML = function () {
@@ -367,11 +512,11 @@ function PegasusCalendar(opt) {
         var headL = $('<div class="head-left"/>');
         var headR = $('<div class="head-right"/>');
 
-        headL.append('<label><input class="js-mode-type" type="radio" name="' + settings.holder + 'mode" value="R" checked="checked" />Round-trip</label>');
-        headL.append('<label><input class="js-mode-type" type="radio" name="' + settings.holder + 'mode" value="O" />one way</label>');
+        headL.append('<label><input class="js-mode-type" type="radio" name="' + settings.holder + 'mode" value="O" checked="checked" />one way</label>');
+        headL.append('<label><input class="js-mode-type" type="radio" name="' + settings.holder + 'mode" value="R" />Round-trip</label>');
 
-        headR.append('<div class="">Select Departure Date</div>');
-        headR.append('<div class="">Select Return Date</div>');
+        headR.append('<div class="">' + settings.selectTxts[0] + '</div>');
+        headR.append('<div class="">' + settings.selectTxts[1] + '</div>');
         head.append(headL, headR);
 
         var body = $('<div class="cal-body"/>');
@@ -387,10 +532,53 @@ function PegasusCalendar(opt) {
         bodyR.append(table, '<div class="month-wrapper js-viewport"><div class="js-month-container"></div></div>');
         body.append(bodyL, bodyR);
 
+        var messageStrip = $('<div class="calViewMessage"><div class="cal-msg-desc">Message to Show</div><a title="Hide Message" href="#" class="close-cal sprite" /></div>');
+
         $('body').append(holder);
 
 //        console.log(head, body);
-        holder.html('').append(head, body).addClass('pegasus-cal');
+        holder.html('').append(head, messageStrip, body).addClass('pegasus-cal');
+    };
+
+    var _checkCalType = function () {
+        if (settings.departOnly) {
+            var radioEle = $('input.' + clsNames.modes.radio, holder).eq(0);
+            radioEle.trigger('click');
+            $('.head-left', holder).hide();
+        }
+        else if (settings.returnCalOnly) {
+            var radioEle = $('input.' + clsNames.modes.radio, holder).eq(1);
+            radioEle.trigger('click');
+            $('.head-left', holder).hide();
+        }
+        if (settings.hideModes) {
+            $('.head-left', holder).hide();
+        }
+        if (settings.defaultMode == "R") {
+            _selectRoundTrip();
+        }
+    };
+
+    var _selectRoundTrip = function () {
+        var radioEle = $('input.' + clsNames.modes.radio, holder).eq(1);
+        radioEle.trigger('click');
+    };
+
+    this.hideMessage = function (slide) {
+        if (slide) {
+            $('.calViewMessage', holder).slideUp();
+        }
+        else {
+            $('.calViewMessage', holder).hide();
+        }
+    };
+
+    this.updateMessage = function (msg, show) {
+        $('.calViewMessage', holder).children('.cal-msg-desc').html(msg).slideDown();
+        if (show) {
+            _this.hideMessage();
+            $('.calViewMessage', holder).slideDown();
+        }
     };
 
     var _attachCallbacks = function () {
@@ -401,11 +589,15 @@ function PegasusCalendar(opt) {
         _this.on('modeChange', function (res) {
             _updateInput(res);
         });
+
+        if (typeof settings.onOpen == "function") {
+            _this.on('open', settings.onOpen);
+        }
     };
 
     var _updateInput = function (obj) {
         var str = '';
-        if (obj.F) {
+        if (obj && obj.F) {
             str = getDateStr(obj.F);
             if (obj.M == obj.modes.R) {
                 str += ' to ';
@@ -413,25 +605,30 @@ function PegasusCalendar(opt) {
                     str += getDateStr(obj.T);
                 }
                 else {
-                    str += 'Return date';
+                    str += settings.retrunTxt;
                 }
             }
+            else if (settings.outputFormat != 'dd/mm/yyyy') {
+                str += ' ' + obj.F.getFullYear();
+            }
         }
-        $(settings.inputEle).val(str);
+        inputEle.val(str);
         function getDateStr(date) {
+            if (settings.outputFormat == 'dd/mm/yyyy') {
+                return _this.dateToStr(date, '/');
+            }
             return (date.getDate() + ' ' + monthNames[date.getMonth()].slice(0, 3));
         }
     };
 
     var _clearInputCache = function () {
-        $(settings.inputEle).val('');
+        inputEle.val('');
     };
 
     _init();
-
+    inputEle.data('pegasusCal', this);
     PegasusCalendar.prototype.count++;
 }
 
 PegasusCalendar.prototype.count = 0;
-
 

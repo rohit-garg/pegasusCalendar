@@ -39,14 +39,18 @@ var msCalendar = function() {
 	this.createMonthTitle = false;
 	this.styleCSS = {weekNameTD:'tdWeekName', titleTD:'tdTitle', normalTD:'tdOff', hoverTD:'tdOn', selectedTD:'tdSelected', weekendTD:'tdWeekend', enabledTD:'activeTD', disabledTD:'inActiveTD', fixedTD:'datetd', leftArrowTD:'hand', rightArrowTD:'hand', datetext:'datetext', iconSort:'iconSort'};
 	this.showMonthlabel = true;
+        var maxRestrictDate = null;
 	$this = this;
-	this.init = function(h, d, nd, sd, rd) {
+	this.init = function(h, d, nd, sd, rd , mrd) {
 		var oDate = (typeof(d)=="undefined") ? new Date() : d;
 		
 		var dateToBeSelected = (sd == null || sd == "" || sd == undefined) ? null : sd;
 		
 		restrictDate = (typeof rd != "undefined" && rd != null && rd != "") ? rd : null;
-		
+                if(restrictDate) {
+                    restrictDate.setHours(0,0,0,0);
+                }
+		maxRestrictDate = mrd;
 		selectedDate = new Date(d);
 			
 		var objHolder = h;
@@ -338,55 +342,55 @@ var msCalendar = function() {
 			eval(td.fn.onIconCallback)(td.date, td.fn, td.id);
 		};		
 	}
-	var highlight = function() {
-		
-		var td = this;
-		
-		if(td.date < restrictDate)
-		{
-			$('#' + td.id + " a").addClass('disabledAnc');
-			return;
-		}
-		
-		$this.oldCSS = td.className;
-		td.className = 'tdOn clsDateCell';
-		$this.activeTD = td;
-		$this.activeDate = td.date;
-		if($this.enableSort) {
-			var cssIcon = $this.getCSS("iconSort");
-			$("#"+td.id + " ."+cssIcon).show();
-		}		
-	};	
+//	var highlight = function() {
+//		
+//		var td = this;
+//		
+//		if(td.date < restrictDate)
+//		{
+//			$('#' + td.id + " a").addClass('disabledAnc');
+//			return;
+//		}
+//		
+//		$this.oldCSS = td.className;
+//		td.className = 'tdOn clsDateCell';
+//		$this.activeTD = td;
+//		$this.activeDate = td.date;
+//		if($this.enableSort) {
+//			var cssIcon = $this.getCSS("iconSort");
+//			$("#"+td.id + " ."+cssIcon).show();
+//		}		
+//	};	
 	
-	var restore = function() {
-		var td = this;
-		
-		if(td.date < restrictDate)
-		{
-			//$('#' + td.id + " a").removeClass('disabledAnc');
-			return;
-		}
-		
-		var isWeekend = td.isWeekend;
-		td.className = $this.oldCSS;
-		
-		/*if(isWeekend) {
-			td.className = 'tdWeekend clsDateCell';
-		} else {
-			td.className = 'tdOff clsDateCell';
-		}
-		if(tdSelected) {
-			tdSelected.className = $this.getCSS("selectedTD") + ' clsDateCell';
-		}*/
-		
-		$this.activeTD = null;
-		$this.activeDate = null;
-		if($this.enableSort) {
-			var cssIcon = $this.getCSS("iconSort");
-			$("#"+td.id +" ."+cssIcon).hide();
-		}
-										
-	};
+//	var restore = function() {
+//		var td = this;
+//		
+//		if(td.date < restrictDate)
+//		{
+//			//$('#' + td.id + " a").removeClass('disabledAnc');
+//			return;
+//		}
+//		
+//		var isWeekend = td.isWeekend;
+//		td.className = $this.oldCSS;
+//		
+//		/*if(isWeekend) {
+//			td.className = 'tdWeekend clsDateCell';
+//		} else {
+//			td.className = 'tdOff clsDateCell';
+//		}
+//		if(tdSelected) {
+//			tdSelected.className = $this.getCSS("selectedTD") + ' clsDateCell';
+//		}*/
+//		
+//		$this.activeTD = null;
+//		$this.activeDate = null;
+//		if($this.enableSort) {
+//			var cssIcon = $this.getCSS("iconSort");
+//			$("#"+td.id +" ."+cssIcon).hide();
+//		}
+//										
+//	};
 	var sendDate = function() {
 		
 		var target = this;
@@ -400,7 +404,7 @@ var msCalendar = function() {
 			callback = $this.onDateCellCallback;
 		}
 		
-		if(restrictDate > td.date)
+		if((restrictDate > td.date) || (maxRestrictDate < td.date))
 		{
 			return;
 		}
@@ -543,7 +547,7 @@ var msCalendar = function() {
 		if(day==1 || day==7) {
 			
 			var applyClass = "";
-			if(restrictDate != null && restrictDate != undefined && restrictDate != "" && currentDate < restrictDate)
+			if((restrictDate != null && restrictDate != undefined && restrictDate != "" && currentDate < restrictDate) || (maxRestrictDate && currentDate > maxRestrictDate))
 			{
 				applyClass = $this.getCSS("disabledTD");
 				tdOptions.isDisabled =  true;
@@ -563,7 +567,7 @@ var msCalendar = function() {
 			tdOptions.isWeekend = true;
 		} else {
 			var applyClass = "";
-			if(restrictDate != null && restrictDate != undefined && restrictDate != "" && currentDate < restrictDate)
+			if((restrictDate != null && restrictDate != undefined && restrictDate != "" && currentDate < restrictDate) || (maxRestrictDate && currentDate > maxRestrictDate))
 			{
 				applyClass = $this.getCSS("disabledTD");
 				tdOptions.isDisabled =  true;
@@ -750,7 +754,7 @@ if(typeof(Prototype)== "undefined") {
 		};
 }
 //Element.prototype.update = HTMLElement.prototype.update;
-var holidays_cal_json = {"td_2014_1_1":"New Year's Day","td_2014_1_14":"Makar Sankranti","td_2014_1_26":"Republic Day","td_2014_2_04":"Vasant Panchami","td_2014_2_19":"Shivaji Jayanti","td_2014_2_27":"Maha Shivaratri/Shivaratri","td_2014_3_16":"Holi","td_2014_4_8":"Rama Navami","td_2014_4_13":"Mahavir Jayanti","td_2014_04_14":"Ambedkar Jayanti","td_2014_4_18":"Good Friday","td_2014_4_20":"Easter Day","td_2014_5_1":"May Day","td_2014_5_14":"Buddha Purnima/Vesak","td_2014_7_29":"Ramzan Id/Eid-ul-Fitar","td_2014_8_10":"Raksha Bandhan (Rakhi)","td_2014_8_15":"Independence Day","td_2014_8_17":"Janmashtami","td_2014_8_29":"Ganesh Chaturthi","td_2014_9_7":"Onam","td_2014_10_2":"Mahatma Gandhi Jayanti","td_2014_10_3":"Dussehra (Maha Navami)","td_2014_10_6":"Eid al-Adha","td_2014_10_23":"Diwali/Deepavali","td_2014_10_24":"Govardhan Puja","td_2014_10_25":"Bhai Duj","td_2014_10_29":"Chhat Puja (Pratihar Sashthi/Surya Sashthi)","td_2014_11_4":"Muharram/Ashura","td_2014_11_6":"Guru Nanak Jayanti","td_2014_12_24":"Christmas Eve","td_2014_12_25":"Christmas","td_2014_12_31":"New Year's Eve", "td_2015_1_1":"New Year's Day","td_2015_1_15":"Pongal","td_2015_1_26":"Republic Day","td_2015_2_17":"Maha Shivaratri/Shivaratri","td_2015_2_19":"Shivaji Jayanti","td_2015_3_5":"Holika Dahana","td_2015_3_28":"Rama Navami","td_2015_4_2":"Mahavir Jayanti","td_2015_4_3":"Good Friday","td_2015_4_5":"Easter Day","td_2015_4_14":"Ambedkar Jayanti","td_2015_7_19":"Ramzan Id/Eid-ul-Fitar","td_2015_8_15":"Independence Day","td_2015_8_28":"Onam","td_2015_8_29":"Raksha Bandhan (Rakhi)","td_2015_9_5":"Janmashtami","td_2015_9_17":"Ganesh Chaturthi/Vinayaka Chaturthi","td_2015_9_25":"Baqr'Eid/Eid al-Adha","td_2015_10_2":"Mahatma Gandhi Jayanti","td_2015_10_22":"Dussehra (Maha Navami)","td_2015_11_11":"Diwali/Deepavali","td_2015_11_13":"Bhai Duj","td_2015_11_17":"Chhat Puja (Pratihar Sashthi/Surya Sashthi)","td_2015_11_25":"Guru Nanak Jayanti","td_2015_12_24":"Christmas Eve","td_2015_12_25":"Christmas","td_2015_12_31":"New Year's Eve"};
+var holidays_cal_json = {"td_2016_1_1":"New Year's Day","td_2016_1_14":"Makar Sankranti","td_2016_1_15":"Pongal","td_2016_1_16":"Guru Govind Singh Jayanti","td_2016_1_26":"Republic Day","td_2016_2_8":"Chinese New Year","td_2016_2_12":"Vasant Panchami","td_2016_2_14":"Valentine's Day","td_2016_2_19":"Shivaji Jayanti","td_2016_2_22":"Guru Ravidas Jayanti","td_2016_3_4":"Maharishi Dayanand Jayanti","td_2016_3_7":"Maha Shivaratri","td_2016_3_23":"Holi","td_2016_3_24":"Dolyatra","td_2016_3_25":"Good Friday","td_2016_3_27":"Easter Day","td_2016_4_8":"Chaitra Sukhladi","td_2016_4_13":"Vaisakhi","td_2016_4_14":"Mesadi/Vaisakhadi","td_2016_4_14":"Ambedkar Jayanti","td_2016_4_15":"Rama Navami","td_2016_4_20":"Mahavir Jayanti","td_2016_4_21":"Hazarat Ali's Birthday","td_2016_4_23":"First day of Passover","td_2016_5_1":"May Day","td_2016_5_8":"Mother's Day","td_2016_5_8":"Birthday of Ravindranath","td_2016_5_21":"Buddha Purnima/Vesak","td_2016_6_19":"Father's Day","td_2016_7_1":"Jamat Ul_Vida","td_2016_7_6":"Rath Yatra","td_2016_7_8":"Ramzan Id/Eid-ul-Fitar","td_2016_8_7":"Friendship Day","td_2016_8_15":"Independence Day","td_2016_8_15":"Thanksgiving Day","td_2016_8_17":"Parsi New Year","td_2016_8_18":"Raksha Bandhan","td_2016_8_25":"Janmashtami","td_2016_9_5":"Ganesh Chaturthi","td_2016_9_12":"Id-ul-Zuha(Bakrid)","td_2016_9_14":"Onam","td_2016_10_2":"Mahatma Gandhi Jayanti","td_2016_10_11":"Dussehra","td_2016_10_12":"Muharram","td_2016_10_16":"Maharishi Valmiki Jayanti","td_2016_10_19":"Karva Chauth","td_2016_10_29":"Naraka Chaturdasi","td_2016_10_30":"Diwali","td_2016_10_31":"Halloween","td_2016_10_31":"Govardhan Puja","td_2016_11_1":"Bhai Duj","td_2016_11_6":"Chhat Puja","td_2016_11_14":"Guru Nanak's Birthday","td_2016_11_24":"Guru Tegh Bahadur's Martyrdom Day","td_2016_12_13":"Milad un_Nabi/Id-e-Milad","td_2016_12_24":"Christmas Eve","td_2016_12_25":"First Day of Hanukkah","td_2016_12_25":"Christmas","td_2016_12_31":"New Year's Eve"};
 var Calendar = {};
 Calendar.Config = {
 	holidays :holidays_cal_json,
